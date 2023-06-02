@@ -53,34 +53,65 @@ const VisualImage = styled.img`
 `
 
 const Home: React.FC = () => {
-    const SLIDE_SIZE = VisualList.length; // 슬라이드 전체 사이즈
-    const [currentSlide, setCurrentSlide] = useState(0);
+    const [currentSlide, setCurrentSlide] = useState(0);  
+    const 양끝에_추가될_데이터수 = 1;
 
-  const getSlidesToShow = () => {
-    const nextIndex = (currentSlide + 1) % SLIDE_SIZE;
-    const slides = [VisualList[currentSlide], VisualList[nextIndex]];
-
-    // 마지막 슬라이드에서 다음 버튼을 눌렀을 때, 첫 번째 슬라이드가 있는 다음 슬라이드를 추가
-    if (nextIndex === 0) {
-      slides.push(VisualList[0]);
+  const setSlides = () => {
+    let addedFront = [];
+    let addedLast = [];
+    let index = 0;
+    while (index < 양끝에_추가될_데이터수) {
+      addedLast.push(VisualList[index % VisualList.length]);
+      addedFront.unshift(VisualList[VisualList.length - 1 - (index % VisualList.length)]);
+      index++;
     }
+    return [...addedFront, ...VisualList, ...addedLast];
+  }
 
-    return slides;
-  };
+  const SLIDE_SIZE = setSlides().length; // 슬라이드 전체 사이즈
+  const transitionTime = 500;
+const transitionStyle = `transform ${transitionTime}ms ease 0s`;
+
+// function replaceSlide(index) {
+//   setTimeout(() => {
+//     setTransition('');
+//     setCurrentIndex(index);
+//   }, transitionTime)
+// }
+
+// function handleSwipe(direction) {
+//   let index = currentIndex + direction;
+//   setCurrentIndex(index);
+//   if (index < 양끝에_추가될_데이터수) {
+//     index += itemSize;
+//     replaceSlide(index)
+//   }
+//   else if (index >= itemSize + 양끝에_추가될_데이터수) {
+//     index -= - itemSize;
+//     replaceSlide(index)
+//   }
+//   setTransition(transitionStyle);
+// }
+
+
 
     return (
         <HomeSection>
             <VisualContainer style={{background:'#a3a3a3 '}}>
                 <SlideBox >
                     <SlideTrack offset={-currentSlide * 100}>
-                    {getSlidesToShow().map((visual, index) => 
+                    {setSlides()?.map((visual, index) => {
+                      console.log(visual);
+                      return(
                         <VisualInner width={visual.width} height={visual.height}>
-                            {visual.text.map((text, index) =>  
-                            <VisualText color={visual.font[index].color} fontSize={visual.font[index].fontSize} fontWeight={visual.font[index].fontWeight}>
-                                {text} 
-                            </VisualText> )}
-                            <VisualImage src={visual.img}/>
+                          {visual.text.map((text, index) =>  
+                          <VisualText color={visual.font[index].color} fontSize={visual.font[index].fontSize} fontWeight={visual.font[index].fontWeight}>
+                              {text} 
+                          </VisualText> )}
+                          <VisualImage src={visual.img}/>
                         </VisualInner >
+                      )
+                    }
                     )}
                     </SlideTrack>
                     <Progressbar setCurrentSlide={setCurrentSlide} currentSlide={currentSlide} slideSize={SLIDE_SIZE}></Progressbar>
