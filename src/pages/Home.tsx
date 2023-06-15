@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import styled from "styled-components";
 import VisualList from "../assets/Data/data";
 import Progressbar from "../components/Progressbar";
@@ -29,7 +29,7 @@ const SlideBox = styled.div`
 const SlideTrack = styled.div<{ offset: number }>`
   display: flex;
   height: inherit;
-  transition: transform 0.3s ease-in-out;
+  /* transition: transform 0.3s ease-in-out; */
   transform: translateX(${props => props.offset}%);
 `;
 
@@ -52,42 +52,37 @@ const VisualImage = styled.img`
 `;
 
 const Home: React.FC = () => {
-  const 양끝에_추가될_데이터수 = 1;
+  const slideRef = useRef<any>(null);
   const [currentSlide, setCurrentSlide] = useState(1);
-  const [currOffSet, setCurrOffset] = useState(-currentSlide * 100);
 
   const setSlides = () => {
-    let addedFront = [];
-    let addedLast = [];
-    let index = 0;
-    while (index < 양끝에_추가될_데이터수) {
-      addedLast.push(VisualList[index % VisualList.length]);
-      addedFront.unshift(
-        VisualList[VisualList.length - 1 - (index % VisualList.length)]
-      );
-      index++;
-    }
-    return [...addedFront, ...VisualList, ...addedLast];
+    const beforeSlide = VisualList[VisualList.length - 1];
+    const afterSlide = VisualList[0];
+    // 무한 슬라이드를 구현하기 위해 새롭게 배열을 만듦.
+    return [beforeSlide, ...VisualList, afterSlide];
   };
 
   const SLIDE_SIZE = setSlides().length; //보여질 슬라이드 전체 사이즈
-  const transitionTime = 500;
-  const transitionStyle = `transform ${transitionTime}ms ease 0s`;
 
-  const resetCurrentSlide = () => {
-    if (currentSlide >= SLIDE_SIZE - 양끝에_추가될_데이터수 * 2) {
-      console.log("움직여");
-      setTimeout(() => {
-        setCurrentSlide(1);
-      }, 0);
+  const resetCurrentSlide = useCallback(() => {
+    if (currentSlide === 4) {
+      if (slideRef.current) {
+        slideRef.current.style.transition = "";
+      }
+      setCurrentSlide(1);
     }
-  };
+    if (slideRef.current) {
+      setTimeout(() => {
+        slideRef.current.style.transition = "all 0.3s ease-in-out";
+      }, 10);
+    }
+  }, [currentSlide, SLIDE_SIZE]);
 
   return (
     <HomeSection>
       <VisualContainer style={{ background: "#a3a3a3 " }}>
         <SlideBox>
-          <SlideTrack offset={currOffSet}>
+          <SlideTrack ref={slideRef} offset={-currentSlide * 100}>
             {setSlides()?.map((visual, index) => {
               return (
                 <VisualInner
